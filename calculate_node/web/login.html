@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="favicon.webp" type="image/webp">
+    <title>Calculate Node | Login</title>
+    <link rel="stylesheet" href="./static/semantic.min.css">
+    <link rel="stylesheet" href="./static/main.css">
+</head>
+
+<body style="padding-top: 20vh;">
+
+    <h1 style="text-align: center;">Calculate Node</h1>
+
+    <div class="ui card input form-box">
+        <input type="text" name="username" placeholder="Username">
+        <input type="password" name="password" placeholder="Password">
+        <button class="ui primary button" style="margin: unset;" onclick="login()">Login</button>
+    </div>
+
+    <p class="copy">Copyright © <a href="https://github.com/Arsfy">Arsfy</a> 2024.</p>
+
+    <script>
+        const login = () => {
+            let username = document.querySelector('input[name="username"]').value
+            let password = document.querySelector('input[name="password"]').value
+
+            if (username.length < 1 || password.length < 1) {
+                alert('Please fill in all fields.')
+                return
+            } else {
+                fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `username=${username}&password=${password}`
+                }).then(response => response.json()).then(data => {
+                    if (data.status == 200) {
+                        location = "/"
+                    } else alert("password or username is incorrect.")
+                })
+            }
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="favicon.webp" type="image/webp">
+    <title>Calculate Node | Home</title>
+    <link rel="stylesheet" href="./static/semantic.min.css">
+    <link rel="stylesheet" href="./static/main.css">
+</head>
+
+<body>
+    <div class="main-box">
+        <div style="display: flex; flex-direction: row;">
+            <h1 class="ui header" style="flex: 1;">Calculate Node</h1>
+            <div class="ui icon buttons" style="margin-bottom: 14px;">
+                <button class="ui button">
+                    <i class="sign-out icon"></i>
+                </button>
+            </div>
+        </div>
+        <div style="display: flex; flex-direction: row;height: calc(100vh - 150px);">
+            <div style="flex: 1;margin-right: 10px;margin-top: 1rem;">
+                <!-- Info -->
+                <div class="ui card" style="width: 100%;">
+                    <div class="content" style="display: flex;align-items: center;">
+                        <div class="header" style="flex: 1;"><i class="icon server"></i> Server</div>
+                    </div>
+                    <div class="content">
+                        <div class="ui statistics" style="display: grid; grid-template-columns: repeat(3, 1fr);">
+                            <div class="statistic">
+                                <div class="value" id="cpu-value">
+                                    0%
+                                </div>
+                                <div class="label">
+                                    CPU
+                                </div>
+                            </div>
+                            <div class="statistic" id="mem-statistic">
+                                <div class="value" id="mem-value">
+                                    0%
+                                </div>
+                                <div class="label">
+                                    <span id="mem-title">Memory</span>
+                                    <span id="mem-info"></span>
+                                </div>
+                            </div>
+                            <div class="statistic">
+                                <div class="value">
+                                    1
+                                </div>
+                                <div class="label">
+                                    Members
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Stream -->
+                <div class="ui card" style="width: 100%;">
+                    <div class="content" style="display: flex;align-items: center;">
+                        <div class="header" style="flex: 1;"><i class="icon film"></i> Stream</div>
+                        <div class="ui search">
+                            <div class="ui icon input">
+                                <input class="prompt" type="text" placeholder="Name ...">
+                                <i class="search icon"></i>
+                            </div>
+                            <div class="results"></div>
+                        </div>
+                    </div>
+                    <div id="stream-item-box"></div>
+                </div>
+                <!-- Upload -->
+                <div class="ui card" style="width: 100%;">
+                    <div class="content" style="display: flex;align-items: center;">
+                        <div class="header" style="flex: 1;"><i class="icon upload"></i> Upload</div>
+                    </div>
+                    <div class="content">
+
+                    </div>
+                </div>
+            </div>
+            <div class="ui card log">
+                <div class="content" id="log">
+
+                </div>
+            </div>
+        </div>
+
+        <p class="copy">Copyright © <a href="https://github.com/Arsfy">Arsfy</a> 2024.</p>
+
+        <script>
+            const addLog = (text) => {
+                const now = new Date();
+                document.getElementById('log').innerHTML += `<div class="ui blue horizontal label">${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}</div> ${text}<br />`
+            }
+
+            const get = (page) => {
+                fetch('/api/get', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: "page=" + page
+                }).then(response => response.json()).then(data => {
+                    if (data.status == 200) {
+                        addLog("Connected to server...")
+
+                        for (let i = 0; i < data.data.length; i++) {
+                            document.getElementById('stream-item-box').innerHTML += `<div class="stream-item">
+                                <div class="ui orange horizontal label">ID ${data.data[i].id}</div>
+                                <b>${data.data[i].name}</b>
+                                <span class="right">${data.data[i].count} Ep</span>
+                            </div>`
+                        }
+                    } else location = "/login"
+                })
+            }
+
+            get(1)
+
+            // System Info
+            const bToGB = (b) => {
+                return (b / 1024 / 1024 / 1024).toFixed(1)
+            }
+
+            const cpuValue = document.getElementById('cpu-value');
+            const memValue = document.getElementById('mem-value');
+            const memInfo = document.getElementById('mem-info');
+            const getSystemInfo = () => {
+                fetch('/api/system/info').then(response => response.json()).then(data => {
+                    cpuValue.innerText = data.cpu.toFixed(2) + '%'
+                    memValue.innerText = data.mem.percent + '%'
+                    memInfo.innerText = " " + bToGB(data.mem.used) + '/' + bToGB(data.mem.total) + "G"
+                })
+                setTimeout(getSystemInfo, 2000)
+            }; getSystemInfo();
+        </script>
+</body>
+
+</html>

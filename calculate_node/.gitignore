@@ -1,0 +1,5 @@
+config.json
+calculate*
+database.db
+runtime/*
+.idea
