@@ -70,12 +70,14 @@ func main() {
 
 	// API
 	router.POST("/api/login", loginApi) // Login
+	router.GET("/api/logout", loginOut) // Logout
 
-	router.POST("/api/get", getApi)       // Get Stream
-	router.POST("/api/search", searchApi) // Search Stream
-	router.POST("/api/upload", uploadApi) // Upload Stream
+	router.POST("/api/stream/get", getStreamApi)       // Get Stream
+	router.POST("/api/stream/search", searchStreamApi) // Search Stream
+	router.POST("/api/stream/upload", uploadStreamApi) // Upload Stream
 
-	router.GET("/api/system/info", systemInfoApi) // System Info
+	router.GET("/api/system/info", systemInfoApi)        // System Info
+	router.POST("/api/system/command", systemCommandApi) // System Command
 
 	// Web
 	router.NoRoute(StaticFileHandler)

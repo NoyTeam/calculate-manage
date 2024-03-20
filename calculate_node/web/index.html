@@ -15,7 +15,7 @@
         <div style="display: flex; flex-direction: row;">
             <h1 class="ui header" style="flex: 1;">Calculate Node</h1>
             <div class="ui icon buttons" style="margin-bottom: 14px;">
-                <button class="ui button">
+                <button class="ui button" id="sign-out-btn">
                     <i class="sign-out icon"></i>
                 </button>
             </div>
@@ -48,10 +48,11 @@
                             </div>
                             <div class="statistic">
                                 <div class="value">
-                                    1
+                                    <span id="temp-value">0.0</span>
+                                    <sup style="opacity: 0.8;">°C</sup>
                                 </div>
                                 <div class="label">
-                                    Members
+                                    Temperature
                                 </div>
                             </div>
                         </div>
@@ -63,80 +64,76 @@
                         <div class="header" style="flex: 1;"><i class="icon film"></i> Stream</div>
                         <div class="ui search">
                             <div class="ui icon input">
-                                <input class="prompt" type="text" placeholder="Name ...">
+                                <input class="prompt" type="text" placeholder="Name ..." id="stream-search">
                                 <i class="search icon"></i>
                             </div>
                             <div class="results"></div>
                         </div>
                     </div>
                     <div id="stream-item-box"></div>
+                    <div class="content" style="display: flex; flex-direction: row;align-items: center;">
+                        <span style="flex: 1;"><b>Total: </b><span id="stream-total"></span></span>
+                        <div class="ui buttons" id="stream-btn-group"></div>
+                    </div>
                 </div>
                 <!-- Upload -->
                 <div class="ui card" style="width: 100%;">
                     <div class="content" style="display: flex;align-items: center;">
                         <div class="header" style="flex: 1;"><i class="icon upload"></i> Upload</div>
                     </div>
-                    <div class="content">
-
+                    <div class="content" style="display: flex; flex-direction: row;">
+                        <div class="upload-ctrl">
+                            <div class="ui input">
+                                <input type="text" placeholder="Name" id="upload-name" readonly>
+                            </div>
+                            <div class="ui input">
+                                <input type="text" placeholder="ID" id="upload-id" readonly>
+                            </div>
+                            <button class="ui button" id="upload-btn">Upload</button>
+                        </div>
+                        <div style="flex: 1;padding-left: 14px;">
+                            <input type="file" id="upload-file" style="visibility: hidden;position: absolute;"
+                                accept=".mp4">
+                            <label class="ui card upload-label" for="upload-file">
+                                <div class="content" style="display: contents;">
+                                    <i class="icon archive" id="upload-archive-icon"></i>
+                                    <video id="upload-preview"></video>
+                                    <span id="upload-file-name" style="margin-top: 5px;">No file selected</span>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="ui card log">
-                <div class="content" id="log">
+                <div class="content" id="log"></div>
+                <div style="padding: 1em 1em;display: flex; flex-direction: row;">
+                    <button class="ui button icon" id="clear-history"><i class="icon eraser"></i></button>
+                    <div class="ui action input" style="width: calc(100% - 7.75em)">
+                        <input type="text" placeholder="Command" id="command">
+                        <button class="ui button" id="command-btn">Run</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Dialog -->
+        <div id="dialog" class="close">
+            <div class="ui modal active" id="dialog-modal">
+                <i class="close icon"></i>
+                <div class="header" id="dialog-title"></div>
+                <div class="content"></div>
+                <div class="actions">
+                    <div class="ui black deny button close">
+                        Cancel
+                    </div>
                 </div>
             </div>
         </div>
 
         <p class="copy">Copyright © <a href="https://github.com/Arsfy">Arsfy</a> 2024.</p>
 
-        <script>
-            const addLog = (text) => {
-                const now = new Date();
-                document.getElementById('log').innerHTML += `<div class="ui blue horizontal label">${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}</div> ${text}<br />`
-            }
-
-            const get = (page) => {
-                fetch('/api/get', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: "page=" + page
-                }).then(response => response.json()).then(data => {
-                    if (data.status == 200) {
-                        addLog("Connected to server...")
-
-                        for (let i = 0; i < data.data.length; i++) {
-                            document.getElementById('stream-item-box').innerHTML += `<div class="stream-item">
-                                <div class="ui orange horizontal label">ID ${data.data[i].id}</div>
-                                <b>${data.data[i].name}</b>
-                                <span class="right">${data.data[i].count} Ep</span>
-                            </div>`
-                        }
-                    } else location = "/login"
-                })
-            }
-
-            get(1)
-
-            // System Info
-            const bToGB = (b) => {
-                return (b / 1024 / 1024 / 1024).toFixed(1)
-            }
-
-            const cpuValue = document.getElementById('cpu-value');
-            const memValue = document.getElementById('mem-value');
-            const memInfo = document.getElementById('mem-info');
-            const getSystemInfo = () => {
-                fetch('/api/system/info').then(response => response.json()).then(data => {
-                    cpuValue.innerText = data.cpu.toFixed(2) + '%'
-                    memValue.innerText = data.mem.percent + '%'
-                    memInfo.innerText = " " + bToGB(data.mem.used) + '/' + bToGB(data.mem.total) + "G"
-                })
-                setTimeout(getSystemInfo, 2000)
-            }; getSystemInfo();
-        </script>
+        <script src="./static/main.js"></script>
 </body>
 
 </html>

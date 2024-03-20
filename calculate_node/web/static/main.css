@@ -21,13 +21,21 @@
 .log {
     width: 300px !important;
     height: 100%;
-    /* background-color: #f3f3f3 !important; */
+}
+
+#log {
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
 #stream-item-box {
     padding-top: 5px;
     padding-bottom: 5px;
     border-top: 1px solid rgba(34, 36, 38, .1);
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .stream-item {
@@ -76,4 +84,68 @@
 
 #mem-statistic:hover #mem-title {
     transform: translateX(-105%);
+}
+
+.ui.horizontal.divider {
+    font-size: 0.6rem;
+}
+
+#dialog {
+    height: 100vh;
+    width: 100vw;
+    background-color: #00000054;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 300ms;
+    visibility: hidden;
+}
+
+#dialog .ui.modal {
+    transform: scale(0);
+    transition: transform 200ms ease-in-out;
+}
+
+#dialog.active {
+    opacity: 1;
+}
+
+#dialog.active .ui.modal {
+    transform: scale(1);
+}
+
+.upload-ctrl {
+    border-right: 1px solid rgba(34, 36, 38, .1);
+    padding-right: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.upload-ctrl .ui.button {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.upload-label {
+    margin-top: 0 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 100% !important;
+    height: 200px !important;
+    box-shadow: none !important;
+    border: 1px solid rgba(34, 36, 38, .15) !important;
+    border-radius: .28571429rem !important;
+    user-select: none;
+    cursor: pointer;
+}
+
+#upload-preview {
+    display: none;
+    height: 150px;
 }

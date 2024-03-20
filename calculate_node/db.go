@@ -28,8 +28,8 @@ func initDatabase() {
 	}
 }
 
-func queryData(page int) ([]Data, error) {
-	rows, err := Db.Query("SELECT id, name, count FROM stream ORDER BY id DESC LIMIT ?,40", (page-1)*20)
+func queryStreamData(page int) ([]Data, error) {
+	rows, err := Db.Query("SELECT id, name, count FROM stream ORDER BY id DESC LIMIT ?,20", (page-1)*20)
 	if err != nil {
 		return nil, err
 	}
@@ -55,10 +55,20 @@ func queryData(page int) ([]Data, error) {
 	return result, nil
 }
 
-func searchData(search string) ([]Data, error) {
-	rows, err := Db.Query("SELECT id, name, count FROM stream WHERE name LIKE ? ORDER BY id DESC", "%"+search+"%")
+func queryStreamCount() (int, error) {
+	var count = 0
+	err := Db.QueryRow("SELECT COUNT(id) FROM stream").Scan(&count)
 	if err != nil {
-		return nil, err
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func searchStreamData(search string, page int) ([]Data, int, error) {
+	rows, err := Db.Query("SELECT id, name, count FROM stream WHERE name LIKE ? ORDER BY id DESC LIMIT ?,20", "%"+search+"%", (page-1)*20)
+	if err != nil {
+		return nil, 0, err
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
@@ -71,15 +81,21 @@ func searchData(search string) ([]Data, error) {
 	for rows.Next() {
 		var d Data
 		if err := rows.Scan(&d.ID, &d.Name, &d.Count); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		result = append(result, d)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return result, nil
+	var count = 0
+	err = Db.QueryRow("SELECT COUNT(id) FROM stream WHERE name LIKE ?", "%"+search+"%").Scan(&count)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return result, count, nil
 }
 
 func userExists(username, password string) (bool, error) {
