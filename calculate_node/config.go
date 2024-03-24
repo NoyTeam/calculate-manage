@@ -9,6 +9,8 @@ import (
 var Config struct {
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
+	Token    string `json:"token"`
+	Server   string `json:"server"`
 	Secret   string `json:"secret"`
 	Database string `json:"database"`
 }

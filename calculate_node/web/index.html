@@ -26,33 +26,37 @@
                 <div class="ui card" style="width: 100%;">
                     <div class="content" style="display: flex;align-items: center;">
                         <div class="header" style="flex: 1;"><i class="icon server"></i> Server</div>
+                        <i class="icon info circle" style="cursor: pointer;" id="info"></i>
                     </div>
                     <div class="content">
                         <div class="ui statistics" style="display: grid; grid-template-columns: repeat(3, 1fr);">
                             <div class="statistic">
                                 <div class="value" id="cpu-value">
-                                    0%
+                                    0.00%
                                 </div>
                                 <div class="label">
-                                    CPU
-                                </div>
-                            </div>
-                            <div class="statistic" id="mem-statistic">
-                                <div class="value" id="mem-value">
-                                    0%
-                                </div>
-                                <div class="label">
-                                    <span id="mem-title">Memory</span>
-                                    <span id="mem-info"></span>
+                                    <span class="statistic-title">CPU</span>
+                                    <span class="statistic-info" style="margin-left: 2px;" id="cpu-info">
+                                        0.0°C
+                                    </span>
                                 </div>
                             </div>
                             <div class="statistic">
-                                <div class="value">
-                                    <span id="temp-value">0.0</span>
-                                    <sup style="opacity: 0.8;">°C</sup>
+                                <div class="value" id="mem-value">
+                                    0.00%
                                 </div>
                                 <div class="label">
-                                    Temperature
+                                    <span class="statistic-title">Memory</span>
+                                    <span class="statistic-info" id="mem-info"> 0.0/0.0G</span>
+                                </div>
+                            </div>
+                            <div class="statistic">
+                                <div class="value" id="gpu-value">
+                                    0.00%
+                                </div>
+                                <div class="label">
+                                    <span class="statistic-title">GPU</span>
+                                    <span class="statistic-info" id="gpu-info"> 0% 0°C</span>
                                 </div>
                             </div>
                         </div>
@@ -61,7 +65,12 @@
                 <!-- Stream -->
                 <div class="ui card" style="width: 100%;">
                     <div class="content" style="display: flex;align-items: center;">
-                        <div class="header" style="flex: 1;"><i class="icon film"></i> Stream</div>
+                        <div class="header" style="flex: 1;"><i class="icon film"></i> Stream
+                            <button class="circular ui icon button" style="padding-left: 5px;background: unset;"
+                                id="stream-sync-btn">
+                                <i class="icon sync"></i>
+                            </button>
+                        </div>
                         <div class="ui search">
                             <div class="ui icon input">
                                 <input class="prompt" type="text" placeholder="Name ..." id="stream-search">
@@ -78,8 +87,11 @@
                 </div>
                 <!-- Upload -->
                 <div class="ui card" style="width: 100%;">
-                    <div class="content" style="display: flex;align-items: center;">
+                    <div class="content" style="display: flex;align-items: center;flex-direction: row;">
                         <div class="header" style="flex: 1;"><i class="icon upload"></i> Upload</div>
+                        <button class="ui button icon mini" id="add-stream-btn">
+                            <i class="icon add"></i>
+                        </button>
                     </div>
                     <div class="content" style="display: flex; flex-direction: row;">
                         <div class="upload-ctrl">
@@ -104,6 +116,33 @@
                         </div>
                     </div>
                 </div>
+                <!-- FanCtrl -->
+                <div class="ui card" style="width: 100%;">
+                    <div class="content">
+                        <div class="header"><i class="icon bolt"></i> Fan</div>
+                    </div>
+                    <div class="content" id="fan-box">
+                        <div class="ui indicating progress">
+                            <div class="bar" id="fan-bar"></div>
+                            <div class="label" id="fan-value">0% (0/254)</div>
+                        </div>
+                        <div style="display: flex; flex-direction: row; justify-content: space-between;">
+                            <div>
+                                <div class="ui icon buttons">
+                                    <button class="ui button" onclick="changeFan(-10)"><i
+                                            class="minus icon"></i></button>
+                                    <button class="ui button" onclick="changeFan(10)"><i class="plus icon"></i></button>
+                                </div>
+                                <div class="ui action input" style="margin-left: 3px;">
+                                    <input type="text" placeholder="Value" id="fan-value-input">
+                                    <button class="ui button"
+                                        onclick="const fv=Number(document.getElementById('fan-value-input').value);changeFan(!isNaN(fv) ? fv : 0, true)">Set</button>
+                                </div>
+                            </div>
+                            <button class="ui positive button" id="fan-set-save">Save</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="ui card log">
                 <div class="content" id="log"></div>
@@ -118,7 +157,7 @@
         </div>
 
         <!-- Dialog -->
-        <div id="dialog" class="close">
+        <div id="dialog" class="close n-dialog">
             <div class="ui modal active" id="dialog-modal">
                 <i class="close icon"></i>
                 <div class="header" id="dialog-title"></div>
@@ -126,6 +165,62 @@
                 <div class="actions">
                     <div class="ui black deny button close">
                         Cancel
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Stream Dialog -->
+        <div id="add-stream-dialog" class="close n-dialog">
+            <div class="ui modal active" id="add-stream-dialog-modal">
+                <i class="close icon"></i>
+                <div class="header">Add Stream</div>
+                <div class="content" style="display: flex;flex-direction: row;">
+                    <div>
+                        <input type="file" id="add-stream-image" style="visibility: hidden;position: absolute;"
+                            accept="image/*">
+                        <label class="ui card add-image-card" for="add-stream-image">
+                            <i class="icon add"></i>
+                        </label>
+                    </div>
+                    <div style="flex: 1;margin-left: 10px;" class="ui form" id="add-stream-form">
+                        <div class="field">
+                            <label>Name</label>
+                            <div class="ui input">
+                                <input type="text" placeholder="Name" id="add-stream-name">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Description</label>
+                            <div class="ui input">
+                                <textarea type="text" placeholder="Description" rows="3" id="add-stream-des"></textarea>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Tags</label>
+                            <div class="ui input" style="flex-direction: column;">
+                                <div style="margin-bottom: 5px;display: none;" id="add-stream-tags-preview"></div>
+                                <input type="text" placeholder="Tags" id="add-stream-tags">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Type</label>
+                            <select class="ui selection dropdown" id="add-stream-type">
+                                <option value="0">Anime Series</option>
+                                <option value="1">Hentai</option>
+                                <option value="2">Animation</option>
+                                <option value="3">Video</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <div class="ui black deny button close">
+                        Cancel
+                    </div>
+                    <div class="ui positive right labeled icon button" id="add-stream-submit">
+                        Add
+                        <i class="checkmark icon"></i>
                     </div>
                 </div>
             </div>

@@ -22,8 +22,8 @@
     </div>
 
     <!-- Dialog -->
-    <div id="dialog" class="close">
-        <div class="ui modal active mini">
+    <div id="dialog" class="close n-dialog">
+        <div class="ui modal active mini" id="dialog-modal">
             <i class="close icon"></i>
             <div class="header" id="dialog-title"></div>
             <div class="content"></div>
@@ -42,16 +42,25 @@
 
         // Open Dialog
         const dialog = document.getElementById('dialog');
+        const dialogModal = document.getElementById('dialog-modal');
         const dialogTitle = document.getElementById('dialog-title');
         const dialogCancel = document.getElementsByClassName('close');
+        const closeDialog = () => {
+            dialogStatus = false;
+            dialog.classList.remove('active');
+            setTimeout(() => {
+                dialog.style.visibility = "hidden";
+            }, 300)
+        }
         const openDialog = (title, content) => {
+            dialogStatus = true;
             dialog.style.visibility = "visible";
             dialogTitle.innerText = title;
             dialog.querySelector('.content').innerText = content;
             dialog.classList.add('active');
-            for (let i in dialogCancel) dialogCancel[i].onclick = () => {
-                dialog.classList.remove('active');
-                setTimeout(() => dialog.style.visibility = "hidden", 300)
+            for (let i in dialogCancel) dialogCancel[i].onclick = () => closeDialog();
+            dialogModal.onclick = (e) => {
+                e.stopPropagation();
             }
         }
 

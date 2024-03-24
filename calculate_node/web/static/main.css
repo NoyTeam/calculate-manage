@@ -28,6 +28,7 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #stream-item-box {
@@ -53,11 +54,7 @@
     float: right;
 }
 
-.statistic {
-    user-select: none;
-}
-
-#mem-info {
+.statistic-info {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -66,23 +63,28 @@
     transition: opacity 200ms, transform 200ms;
 }
 
-#mem-statistic {
+.statistic {
     position: relative;
+    user-select: none;
 }
 
-#mem-statistic #mem-title {
+.statistic .label {
+    min-height: 1.4285em;
+}
+
+.statistic .statistic-title {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     transition: transform 200ms;
 }
 
-#mem-statistic:hover #mem-info {
+.statistic:hover .statistic-info {
     transform: translateX(5%);
     opacity: 0.7;
 }
 
-#mem-statistic:hover #mem-title {
+.statistic:hover .statistic-title {
     transform: translateX(-105%);
 }
 
@@ -90,7 +92,7 @@
     font-size: 0.6rem;
 }
 
-#dialog {
+.n-dialog {
     height: 100vh;
     width: 100vw;
     background-color: #00000054;
@@ -105,16 +107,16 @@
     visibility: hidden;
 }
 
-#dialog .ui.modal {
+.n-dialog .ui.modal {
     transform: scale(0);
     transition: transform 200ms ease-in-out;
 }
 
-#dialog.active {
+.n-dialog.active {
     opacity: 1;
 }
 
-#dialog.active .ui.modal {
+.n-dialog.active .ui.modal {
     transform: scale(1);
 }
 
@@ -148,4 +150,34 @@
 #upload-preview {
     display: none;
     height: 150px;
+}
+
+.log-progress {
+    margin-top: 10px !important;
+    margin-bottom: 0 !important;
+}
+
+.log-progress .bar {
+    height: 0.75em !important;
+}
+
+.add-image-card {
+    width: 210px !important;
+    /* height: 315px !important; */
+    height: 21.5em !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0 !important;
+    cursor: pointer;
+    user-select: none;
+}
+
+.ui.form .field {
+    margin: 0 0 0.5rem !important;
+}
+
+.ui.card>.content>.header:not(.ui),
+.ui.cards>.card>.content>.header:not(.ui) {
+    margin-top: 0 !important;
 }
