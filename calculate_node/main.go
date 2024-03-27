@@ -79,6 +79,7 @@ func main() {
 	router.POST("/api/stream/sync", streamSyncApi)     // Sync Stream
 	router.POST("/api/stream/search", searchStreamApi) // Search Stream
 	router.POST("/api/stream/upload", uploadStreamApi) // Upload Stream
+	router.POST("/api/stream/add", addStreamApi)       // Add Stream
 
 	router.GET("/api/system/info", systemInfoApi)        // System Info
 	router.POST("/api/system/command", systemCommandApi) // System Command

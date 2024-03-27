@@ -101,7 +101,14 @@
                             <div class="ui input">
                                 <input type="text" placeholder="ID" id="upload-id" readonly>
                             </div>
-                            <button class="ui button" id="upload-btn">Upload</button>
+                            <span>
+                                <button class="ui button"
+                                    style="border-bottom-left-radius: 0;border-bottom-right-radius: 0;"
+                                    id="upload-btn">Upload</button>
+                                <div class="ui progress bottom attached" style="background-color: #bebebe;">
+                                    <div class="bar" id="upload-progress"></div>
+                                </div>
+                            </span>
                         </div>
                         <div style="flex: 1;padding-left: 14px;">
                             <input type="file" id="upload-file" style="visibility: hidden;position: absolute;"
@@ -177,15 +184,16 @@
             <div class="ui modal active" id="add-stream-dialog-modal">
                 <i class="close icon"></i>
                 <div class="header">Add Stream</div>
-                <div class="content" style="display: flex;flex-direction: row;">
+                <div class="content ui form" style="display: flex;flex-direction: row;" id="add-stream-form">
                     <div>
                         <input type="file" id="add-stream-image" style="visibility: hidden;position: absolute;"
                             accept="image/*">
                         <label class="ui card add-image-card" for="add-stream-image">
+                            <img id="add-stream-preview" style="width: 100%;position: absolute;display: none;">
                             <i class="icon add"></i>
                         </label>
                     </div>
-                    <div style="flex: 1;margin-left: 10px;" class="ui form" id="add-stream-form">
+                    <div style="flex: 1;margin-left: 10px;" class="ui form">
                         <div class="field">
                             <label>Name</label>
                             <div class="ui input">

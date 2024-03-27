@@ -55,6 +55,15 @@ func queryStreamData(page int) ([]Data, error) {
 	return result, nil
 }
 
+func insertStreamData(name string, count int) error {
+	_, err := Db.Exec("INSERT INTO stream (name, count) VALUES (?, ?)", name, count)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func queryStreamCount() (int, error) {
 	var count = 0
 	err := Db.QueryRow("SELECT COUNT(id) FROM stream").Scan(&count)

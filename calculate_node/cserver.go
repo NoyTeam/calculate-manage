@@ -197,3 +197,75 @@ func upStreamAll() {
 		log.Println("streamData.Status error:", streamData.Status)
 	}
 }
+
+func uploadAndCreateStream(name, des, tags, typeStr, filePath string) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Println("Error closing file:", err)
+		}
+	}(file)
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(part, file)
+	if err != nil {
+		return err
+	}
+
+	_ = writer.WriteField("name", name)
+	_ = writer.WriteField("des", des)
+	_ = writer.WriteField("tags", tags)
+	_ = writer.WriteField("type", typeStr)
+	_ = writer.WriteField("token", Config.Token)
+
+	err = writer.Close()
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{}
+
+	r, err := http.NewRequest("POST", Config.Server+"/api/stream/add", body)
+	if err != nil {
+		return err
+	}
+	r.Header.Set("Content-Type", writer.FormDataContentType())
+
+	resp, err := client.Do(r)
+	if err != nil {
+		return err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println("Error closing body:", err)
+		}
+	}(resp.Body)
+
+	apiBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	var response ApiType
+	err = json.Unmarshal(apiBody, &response)
+	if err != nil {
+		log.Println("json.Unmarshal value:", string(apiBody))
+		return err
+	}
+
+	if response.Status != 200 {
+		return fmt.Errorf("upload failed: %v", response)
+	}
+
+	return nil
+}

@@ -107,7 +107,6 @@ const getStatus = (key) => {
 
             for (let i = 0; i < slen; i++) {
                 if (lastStatus[i] != undefined) {
-                    console.log(lastStatus[i], data.data[i])
                     document.getElementById(`log-pb-${lastStatus[i].index}`).style.width = data.data[i].percent + "%";
                     logList[lastStatus[i].index].text = data.data[i].msg + " " + data.data[i].percent + "%";
                     if (data.data[i].percent >= 100) {
@@ -129,6 +128,7 @@ const uploadFileName = document.getElementById('upload-file-name');
 const uploadArchiveIcon = document.getElementById('upload-archive-icon');
 const uploadBtn = document.getElementById('upload-btn');
 const uploadPreview = document.getElementById('upload-preview');
+const uploadProgress = document.getElementById("upload-progress")
 uploadFile.onchange = () => {
     uploadArchiveIcon.style.display = 'none';
     uploadPreview.style.display = 'block';
@@ -149,28 +149,61 @@ uploadBtn.onclick = () => {
     form.append('file', uploadFile.files[0]);
     form.append('id', uploadId.value);
 
-    fetch('/api/stream/upload', {
-        method: 'POST',
-        body: form,
-    }).then(response => response.json()).then(data => {
-        uploadBtn.classList.remove('loading');
-        switch (data.status) {
-            case 200:
-                // getStream(lastGetStream.page, lastGetStream.search);
-                getStatus(data.task_id);
-                break;
-            case 500: openDialog('Error', data.msg); addLog(data.msg, "red"); break;
-            case 404: openDialog('Error', data.msg); addLog(data.msg, "red"); break;
-        }
+    // fetch('/api/stream/upload', {
+    //     method: 'POST',
+    //     body: form,
+    // }).then(response => response.json()).then(data => {
+    //     uploadBtn.classList.remove('loading');
+    //     switch (data.status) {
+    //         case 200:
+    //             // getStream(lastGetStream.page, lastGetStream.search);
+    //             getStatus(data.task_id);
+    //             break;
+    //         case 500: openDialog('Error', data.msg); addLog(data.msg, "red"); break;
+    //         case 404: openDialog('Error', data.msg); addLog(data.msg, "red"); break;
+    //     }
 
-        // End
-        uploadFile.value = "";
-        uploadId.value = "";
-        uploadName.value = "";
-        uploadPreview.style.display = 'none';
-        uploadArchiveIcon.style.display = 'block';
-        uploadFileName.innerText = "No file selected";
-    })
+    //     // End
+    //     uploadFile.value = "";
+    //     uploadId.value = "";
+    //     uploadName.value = "";
+    //     uploadPreview.style.display = 'none';
+    //     uploadArchiveIcon.style.display = 'block';
+    //     uploadFileName.innerText = "No file selected";
+    // })
+
+    let xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/stream/upload', true);
+    xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+            let percentComplete = (e.loaded / e.total) * 100;
+            uploadProgress.style.width = percentComplete + '%';
+        }
+    };
+    xhr.onload = function () {
+        if (this.status == 200) {
+            let data = JSON.parse(this.response);
+
+            uploadBtn.classList.remove('loading');
+            uploadProgress.style.width = "0%";
+            switch (data.status) {
+                case 200:
+                    getStatus(data.task_id);
+                    break;
+                case 500: openDialog('Error', data.msg); addLog(data.msg, "red"); break;
+                case 404: openDialog('Error', data.msg); addLog(data.msg, "red"); break;
+            }
+
+            // End
+            uploadFile.value = "";
+            uploadId.value = "";
+            uploadName.value = "";
+            uploadPreview.style.display = 'none';
+            uploadArchiveIcon.style.display = 'block';
+            uploadFileName.innerText = "No file selected";
+        };
+    };
+    xhr.send(form);
 }
 
 // System Info
@@ -254,12 +287,17 @@ addStreamBtn.onclick = () => {
     }
 }
 const addStreamForm = document.getElementById("add-stream-form");
-const addStreamName = addStreamForm.querySelector("#add-stream-name");
-const addStreamDes = addStreamForm.querySelector("#add-stream-des");
-const addStreamTags = addStreamForm.querySelector("#add-stream-tags");
-const addStreamTagsPreview = addStreamForm.querySelector("#add-stream-tags-preview");
-const addStreamType = addStreamForm.querySelector("#add-stream-type");
-const addStreamImage = addStreamForm.querySelector("#add-stream-image");
+const addStreamName = document.getElementById("add-stream-name");
+const addStreamDes = document.getElementById("add-stream-des");
+const addStreamTags = document.getElementById("add-stream-tags");
+const addStreamTagsPreview = document.getElementById("add-stream-tags-preview");
+const addStreamType = document.getElementById("add-stream-type");
+const addStreamImage = document.getElementById("add-stream-image")
+const addStreamPreview = document.getElementById("add-stream-preview");
+addStreamImage.onchange = () => {
+    addStreamPreview.style.display = 'block';
+    addStreamPreview.src = URL.createObjectURL(addStreamImage.files[0]);
+}
 addStreamTags.onkeyup = () => {
     if (addStreamTags.value != "") {
         addStreamTagsPreview.style.display = "block";
@@ -269,7 +307,38 @@ addStreamTags.onkeyup = () => {
             addStreamTagsPreview.innerHTML += `<div class="ui label">${tags[i]}</div>`
         }
     } else addStreamTagsPreview.style.display = "none";
-
+}
+document.getElementById("add-stream-submit").onclick = () => {
+    if (addStreamName.value == "" || addStreamDes.value == "" || addStreamTags.value == "" || addStreamType.value == "") {
+        openDialog("Error", "Please fill in all fields.", 'mini')
+        return
+    }
+    addStreamForm.classList.add('loading');
+    const form = new FormData();
+    form.append('name', addStreamName.value);
+    form.append('des', addStreamDes.value);
+    form.append('tags', addStreamTags.value);
+    form.append('type', addStreamType.value);
+    form.append('file', addStreamImage.files[0]);
+    fetch('/api/stream/add', {
+        method: 'POST',
+        body: form
+    }).then(response => response.json()).then(data => {
+        addStreamForm.classList.remove('loading');
+        switch (data.status) {
+            case 200:
+                addLog("Stream added successfully.", "green")
+                addStreamDialog.classList.remove('active');
+                setTimeout(() => addStreamDialog.style.visibility = "hidden", 300)
+                getStream(1);
+                break;
+            case 500:
+                addLog(data.msg, "red")
+                openDialog('Error', data.msg);
+                break;
+            case 404: openDialog('Error', data.msg); break;
+        }
+    })
 }
 
 // Send Command

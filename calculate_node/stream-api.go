@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -169,6 +170,65 @@ func uploadStreamApi(c *gin.Context) {
 		}()
 
 		c.JSON(200, gin.H{"status": 200, "task_id": taskId})
+	} else {
+		c.JSON(200, gin.H{"status": 403})
+	}
+}
+
+func addStreamApi(c *gin.Context) {
+	session := sessions.Default(c)
+	info := session.Get("status")
+	if info != nil {
+		file, err := c.FormFile("file")
+		if err != nil {
+			log.Println("FormFile error:", err)
+			c.JSON(200, gin.H{"status": 500, "msg": "FormFile error: " + err.Error()})
+			return
+		}
+		runtimeFilePath := "runtime/" + file.Filename
+		if err := c.SaveUploadedFile(file, runtimeFilePath); err != nil {
+			log.Println("SaveUploadedFile error:", err)
+			c.JSON(200, gin.H{"status": 500, "msg": "SaveUploadedFile error: " + err.Error()})
+			return
+		}
+		outputFilePath := "runtime/" + strings.Split(file.Filename, ".")[0] + ".webp"
+		if err := c2webp(runtimeFilePath, outputFilePath); err != nil {
+			log.Println("c2webp error:", err)
+			c.JSON(200, gin.H{"status": 500, "msg": "c2webp error: " + err.Error()})
+			return
+		}
+
+		name := c.PostForm("name")
+		des := c.PostForm("des")
+		tags := c.PostForm("tags")
+		sType := c.PostForm("type")
+		if tags == "" || des == "" || name == "" || sType == "" {
+			c.JSON(200, gin.H{"status": 500, "msg": "tags error"})
+			return
+		}
+
+		if err := uploadAndCreateStream(name, des, tags, sType, outputFilePath); err != nil {
+			log.Println("uploadAndCreateStream error:", err)
+			c.JSON(200, gin.H{"status": 500, "msg": "upload error: " + err.Error()})
+			return
+		}
+
+		err = insertStreamData(name, 0)
+		if err != nil {
+			log.Println("insertStreamData error:", err)
+			c.JSON(200, gin.H{"status": 500, "msg": "insert error: " + err.Error()})
+			return
+		}
+
+		// Remove
+		if err := os.Remove(outputFilePath); err != nil {
+			log.Println("Remove output file error:", err)
+		}
+		if err := os.Remove(runtimeFilePath); err != nil {
+			log.Println("Remove runtime file error:", err)
+		}
+
+		c.JSON(200, gin.H{"status": 200})
 	} else {
 		c.JSON(200, gin.H{"status": 403})
 	}

@@ -122,6 +122,10 @@ body {
     transform: scale(1);
 }
 
+#dialog {
+    z-index: 9999;
+}
+
 .upload-ctrl {
     border-right: 1px solid rgba(34, 36, 38, .1);
     padding-right: 14px;
@@ -165,7 +169,8 @@ body {
 
 .add-image-card {
     width: 210px !important;
-    /* height: 315px !important; */
+    border: 1px solid rgba(34, 36, 38, .15) !important;
+    box-shadow: none !important;
     height: 21.5em !important;
     display: flex !important;
     align-items: center;

@@ -125,3 +125,13 @@ func PostFormRequest(url string, data url.Values) ([]byte, error) {
 
 	return respBody, nil
 }
+
+func c2webp(input, output string) error {
+	cmd := exec.Command("magick", input, output)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
